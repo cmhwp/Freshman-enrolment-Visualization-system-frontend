@@ -65,3 +65,39 @@ export interface SchoolRanking {
   total_students: number
   percentile: number
 }
+
+// 添加用户信息相关接口
+export interface UserProfile {
+  id: number
+  username: string
+  email: string
+  name: string
+  role: string
+  contact?: string
+  province?: string
+  gender?: 'M' | 'F'
+  class_id?: number
+}
+
+export interface UpdateProfileRequest {
+  name?: string
+  contact?: string
+  province?: string
+  gender?: 'M' | 'F'
+}
+
+export interface UpdatePasswordRequest {
+  old_password: string
+  new_password: string
+}
+
+export interface ForgotPasswordRequest {
+  email: string
+  verification_code: string
+  new_password: string
+}
+
+export interface ResetPasswordResponse {
+  success: boolean
+  message: string
+}

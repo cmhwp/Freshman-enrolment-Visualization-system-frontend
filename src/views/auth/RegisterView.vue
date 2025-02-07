@@ -7,6 +7,7 @@ import type { RegisterRequest } from '@/types/api'
 import { provinces } from '@/constants/provinces'
 import { VueLogo } from '@/components/icons'
 
+
 const router = useRouter()
 const loading = ref(false)
 const sendingCode = ref(false)

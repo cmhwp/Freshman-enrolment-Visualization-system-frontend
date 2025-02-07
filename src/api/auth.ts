@@ -1,5 +1,11 @@
 import request from './axios'
-import type { LoginRequest, LoginResponse, RegisterRequest } from '@/types/api'
+import type {
+  LoginRequest,
+  LoginResponse,
+  RegisterRequest,
+  ForgotPasswordRequest,
+  ResetPasswordResponse
+} from '@/types/api'
 
 export const authApi = {
   // 发送验证码
@@ -20,5 +26,21 @@ export const authApi = {
   // 刷新token
   refreshToken: () => {
     return request.post<any, { access_token: string }>('/auth/refresh')
+  },
+
+  // 发送重置密码验证码
+  sendResetCode: (email: string) => {
+    return request.post<any, { success: boolean; message: string }>(
+      '/auth/send-reset-code',
+      { email }
+    )
+  },
+
+  // 重置密码
+  resetPassword: (data: ForgotPasswordRequest) => {
+    return request.post<any, ResetPasswordResponse>(
+      '/auth/reset-password',
+      data
+    )
   }
 }
