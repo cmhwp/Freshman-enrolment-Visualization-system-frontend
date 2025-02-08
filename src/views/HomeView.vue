@@ -10,11 +10,11 @@
         mode="inline"
         @click="handleMenuClick"
       >
-        <a-menu-item key="dashboard">
+        <a-menu-item key="welcome">
           <template #icon>
             <dashboard-outlined />
           </template>
-          <span>仪表盘</span>
+          <span>首页</span>
         </a-menu-item>
 
         <!-- 学生菜单 -->
@@ -60,6 +60,7 @@
             <template #title>用户管理</template>
             <a-menu-item key="admin/student-list">学生管理</a-menu-item>
             <a-menu-item key="admin/teacher-list">教师管理</a-menu-item>
+            <a-menu-item key="admin/create-teacher">创建教师</a-menu-item>
           </a-sub-menu>
           <a-sub-menu key="system">
             <template #icon>
@@ -148,7 +149,7 @@ import { useUserStore } from '@/stores'
 const router = useRouter()
 const userStore = useUserStore()
 const collapsed = ref<boolean>(false)
-const selectedKeys = ref<string[]>(['dashboard'])
+const selectedKeys = ref<string[]>(['welcome'])
 const userRole = computed(() => userStore.userRole)
 const userName = computed(() => userStore.userName)
 

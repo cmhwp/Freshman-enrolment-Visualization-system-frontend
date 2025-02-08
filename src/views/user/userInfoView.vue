@@ -21,12 +21,12 @@
       >
         <a-row :gutter="16">
           <a-col :span="12">
-            <a-form-item label="用户名" name="username">
+            <a-form-item label="用户名">
               <a-input v-model:value="formState.username" disabled />
             </a-form-item>
           </a-col>
           <a-col :span="12">
-            <a-form-item label="邮箱" name="email">
+            <a-form-item label="邮箱">
               <a-input v-model:value="formState.email" disabled />
             </a-form-item>
           </a-col>
@@ -39,33 +39,74 @@
             </a-form-item>
           </a-col>
           <a-col :span="12">
-            <a-form-item label="联系方式" name="contact">
-              <a-input v-model:value="formState.contact" />
+            <a-form-item label="性别" name="gender">
+              <a-select v-model:value="formState.gender">
+                <a-select-option value="M">男</a-select-option>
+                <a-select-option value="F">女</a-select-option>
+              </a-select>
             </a-form-item>
           </a-col>
         </a-row>
 
         <a-row :gutter="16">
           <a-col :span="12">
-            <a-form-item label="省份" name="province">
+            <a-form-item label="联系方式" name="contact">
+              <a-input v-model:value="formState.contact" />
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="所在省份" name="province">
               <a-select v-model:value="formState.province">
-                <a-select-option v-for="province in provinces" :key="province.value" :value="province.value">
-                  {{ province.label }}
+                <a-select-option v-for="prov in provinces" :key="prov.value" :value="prov.value">
+                  {{ prov.label }}
                 </a-select-option>
               </a-select>
             </a-form-item>
           </a-col>
-          <a-col :span="12" v-if="userStore.isStudent">
-            <a-form-item label="性别" name="gender">
-              <a-radio-group v-model:value="formState.gender">
-                <a-radio value="M">男</a-radio>
-                <a-radio value="F">女</a-radio>
-              </a-radio-group>
-            </a-form-item>
-          </a-col>
         </a-row>
-      </a-form>
 
+        <!-- 学生特有信息 -->
+        <template v-if="formState.role === 'student' && formState.student_profile">
+          <a-divider>学籍信息</a-divider>
+          <a-row :gutter="16">
+            <a-col :span="12">
+              <a-form-item label="学号">
+                <a-input v-model:value="formState.student_profile.student_id" disabled />
+              </a-form-item>
+            </a-col>
+          </a-row>
+
+            <a-row :gutter="16">
+              <a-col :span="12">
+                <a-form-item label="专业">
+                  <a-input v-model:value="formState.student_profile.major" disabled />
+                </a-form-item>
+              </a-col>
+            </a-row>
+
+            <a-row :gutter="16">
+              <a-col :span="12">
+                <a-form-item label="入学日期">
+                  <a-input v-model:value="formState.student_profile.admission_date" disabled />
+                </a-form-item>
+              </a-col>
+            </a-row>
+
+            <a-row :gutter="16">
+              <a-col :span="12">
+                <a-form-item label="预计毕业日期">
+                  <a-input v-model:value="formState.student_profile.graduation_date" disabled />
+                </a-form-item>
+              </a-col>
+            </a-row>
+
+            <a-form-item label="学籍状态">
+              <a-tag :color="getStatusColor(formState.student_profile.status)">
+                {{ getStatusText(formState.student_profile.status) }}
+              </a-tag>
+            </a-form-item>
+          </template>
+        </a-form>
       <a-divider />
 
       <div class="password-section">
@@ -127,7 +168,7 @@ import type { FormInstance } from 'ant-design-vue'
 import { useUserStore } from '@/stores'
 import { userApi } from '@/api/user'
 import { provinces } from '@/constants/provinces'
-import type { UserProfile } from '@/types/api'
+import type { StudentProfile } from '@/types/api'
 
 const userStore = useUserStore()
 const formRef = ref<FormInstance>()
@@ -138,16 +179,17 @@ const passwordModalVisible = ref(false)
 const changingPassword = ref(false)
 
 // 表单数据
-const formState = reactive<UserProfile>({
+const formState = reactive<StudentProfile>({
   id: 0,
   username: '',
   email: '',
   name: '',
-  role: '',
+  role: 'student',
   contact: '',
   province: '',
   gender: undefined,
-  class_id: undefined
+  class_id: undefined,
+  student_profile: undefined
 })
 
 // 密码表单数据
@@ -233,6 +275,26 @@ const handlePasswordChange = async () => {
   } finally {
     changingPassword.value = false
   }
+}
+
+// 获取状态文本
+const getStatusText = (status: string) => {
+  const statusMap = {
+    active: '在读',
+    graduated: '已毕业',
+    suspended: '休学'
+  }
+  return statusMap[status as keyof typeof statusMap] || status
+}
+
+// 获取状态标签颜色
+const getStatusColor = (status: string) => {
+  const colorMap = {
+    active: 'green',
+    graduated: 'blue',
+    suspended: 'orange'
+  }
+  return colorMap[status as keyof typeof colorMap] || 'default'
 }
 
 onMounted(() => {

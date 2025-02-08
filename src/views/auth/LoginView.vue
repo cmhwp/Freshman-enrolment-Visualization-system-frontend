@@ -84,7 +84,7 @@ const handleSubmit = async () => {
     })
 
     message.success('登录成功')
-    router.push('/')
+    router.push('/welcome') // 登录成功后跳转到欢迎页面
   } catch (error) {
     console.error('Login error:', error)
   } finally {
@@ -269,6 +269,10 @@ const handleResetPassword = async () => {
   justify-content: center;
   align-items: center;
   background: #f0f2f5;
+  background-image: url('@/assets/images/login_bg.svg');
+  background-repeat: no-repeat;
+  background-position: 50%;
+  background-size: 100%;
 }
 
 .login-content {

@@ -12,19 +12,25 @@ const router = createRouter({
       component: HomeView,
       meta: { requiresAuth: true },
       children: [
-        // // 学生路由
-        // {
-        //   path: 'student/scores',
-        //   name: 'studentScores',
-        //   component: () => import('../views/student/ScoresView.vue'),
-        //   meta: { role: 'student' }
-        // },
-        // {
-        //   path: 'student/ranking',
-        //   name: 'studentRanking',
-        //   component: () => import('../views/student/RankingView.vue'),
-        //   meta: { role: 'student' }
-        // },
+        //公共路由
+        {
+          path: '/welcome',
+          name: 'welcome',
+          component: () => import('@/views/user/welcome.vue'),
+        },
+        // 学生路由
+        {
+          path: 'student/scores',
+          name: 'studentScores',
+          component: () => import('@/views/student/ScoresView.vue'),
+          meta: { role: 'student' }
+        },
+        {
+          path: 'student/ranking',
+          name: 'studentRanking',
+          component: () => import('@/views/student/RankingView.vue'),
+          meta: { role: 'student' }
+        },
 
         // // 教师路由
         // {
@@ -53,31 +59,41 @@ const router = createRouter({
         //   component: () => import('../views/admin/StudentListView.vue'),
         //   meta: { role: 'admin' }
         // },
-        // {
-        //   path: 'admin/teacher-list',
-        //   name: 'adminTeacherList',
-        //   component: () => import('../views/admin/TeacherListView.vue'),
-        //   meta: { role: 'admin' }
-        // },
+        {
+          path: 'admin/teacher-list',
+          name: 'adminTeacherList',
+          component: () => import('@/views/admin/TeacherList.vue'),
+          meta: { role: 'admin' }
+        },
         // {
         //   path: 'admin/settings',
         //   name: 'adminSettings',
         //   component: () => import('../views/admin/SettingsView.vue'),
         //   meta: { role: 'admin' }
         // },
-        // {
-        //   path: 'admin/logs',
-        //   name: 'adminLogs',
-        //   component: () => import('../views/admin/LogsView.vue'),
-        //   meta: { role: 'admin' }
-        // },
+        {
+          path: 'admin/create-teacher',
+          name: 'CreateTeacher',
+          component: () => import('@/views/admin/CreateTeacher.vue'),
+          meta: {
+            title: '创建教师',
+            requiresAuth: true,
+            roles: ['admin']
+          }
+        },
+        {
+          path: 'admin/logs',
+          name: 'adminLogs',
+          component: () => import('../views/admin/SystemLogs.vue'),
+          meta: { role: 'admin' }
+        },
 
         // 用户信息路由
         {
           path: 'user/profile',
           name: 'userProfile',
           component: UserInfoView
-        }
+        },
       ]
     },
     {
@@ -108,7 +124,7 @@ router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth && !userStore.isLoggedIn) {
     next('/login')
   } else if (to.meta.role && to.meta.role !== userStore.userRole) {
-    next('/')
+    next('/welcome')
   } else {
     next()
   }

@@ -11,7 +11,7 @@ export interface LoginResponse {
     id: number
     username: string
     email: string
-    role: string
+    role: 'admin' | 'teacher' | 'student'
     name: string
   }
 }
@@ -66,18 +66,43 @@ export interface SchoolRanking {
   percentile: number
 }
 
-// 添加用户信息相关接口
-export interface UserProfile {
+// 用户基础信息
+export interface BaseUserProfile {
   id: number
   username: string
   email: string
   name: string
-  role: string
-  contact?: string
   province?: string
   gender?: 'M' | 'F'
+  contact?: string
+  role: 'student' | 'teacher' | 'admin'
   class_id?: number
 }
+
+// 教师特有信息
+export interface TeacherProfile extends BaseUserProfile {
+  teacher_profile?: {
+    id: number
+    department: string
+    title?: string
+    research_area?: string
+  }
+}
+
+// 学生特有信息
+export interface StudentProfile extends BaseUserProfile {
+  student_profile?: {
+    id: number
+    student_id: string
+    major: string
+    admission_date?: string
+    graduation_date?: string
+    status: 'active' | 'graduated' | 'suspended'
+  }
+}
+
+// 通用用户信息（联合类型）
+export type UserProfile = TeacherProfile | StudentProfile
 
 export interface UpdateProfileRequest {
   name?: string
@@ -100,4 +125,18 @@ export interface ForgotPasswordRequest {
 export interface ResetPasswordResponse {
   success: boolean
   message: string
+}
+
+export interface CreateTeacherData {
+  username: string
+  email: string
+  password: string
+  name: string
+  gender?: 'M' | 'F'
+  province?: string
+  teacher_profile: {
+    department: string
+    title?: string
+    research_area?: string
+  }
 }
