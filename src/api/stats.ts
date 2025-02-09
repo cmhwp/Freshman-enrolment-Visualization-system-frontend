@@ -1,17 +1,5 @@
 import request from './axios'
-
-export interface StatsOverview {
-  studentCount?: number
-  teacherCount?: number
-  classCount?: number
-  todayVisits?: number
-  managedClasses?: number
-  todoCount?: number
-  className?: string
-  major?: string
-  studentId?: string
-}
-
+import type { StatsOverview } from '@/types/api'
 export const statsApi = {
   // 获取统计概览
   getOverview: () => {

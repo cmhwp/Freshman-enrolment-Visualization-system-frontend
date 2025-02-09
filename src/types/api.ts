@@ -1,3 +1,5 @@
+import dayjs from 'dayjs'
+
 // 用户相关接口
 export interface LoginRequest {
   username: string
@@ -91,14 +93,12 @@ export interface TeacherProfile extends BaseUserProfile {
 
 // 学生特有信息
 export interface StudentProfile extends BaseUserProfile {
-  student_profile?: {
     id: number
     student_id: string
     major: string
     admission_date?: string
     graduation_date?: string
-    status: 'active' | 'graduated' | 'suspended'
-  }
+    status: 'pending' | 'reported' | 'unreported'
 }
 
 // 通用用户信息（联合类型）
@@ -138,5 +138,179 @@ export interface CreateTeacherData {
     department: string
     title?: string
     research_area?: string
+  }
+}
+
+export interface SystemSettings {
+  systemName: string
+  version: string
+  allowRegister: boolean
+  requireEmailVerification: boolean
+  studentIdPrefix: string
+  defaultStudentStatus: string
+  majors: string[]
+  departments: string[]
+  enrollmentDeadline: dayjs.Dayjs | null
+}
+
+export interface UpdateSettingsResponse {
+  success: boolean
+  message: string
+}
+
+export interface GetSettingsResponse {
+  success: boolean
+  data: SystemSettings
+}
+
+// 新生报到统计
+export interface EnrollmentStats {
+  totalCount: number
+  reportedCount: number
+  unreportedCount: number
+  reportRate: number
+  byMajor: Array<{
+    major: string
+    total: number
+    reported: number
+    rate: number
+  }>
+  byProvince: Array<{
+    province: string
+    count: number
+    percentage: number
+  }>
+}
+
+// 宿舍相关类型定义
+export interface DormitoryBuilding {
+  id: number
+  name: string
+  gender: 'M' | 'F'
+  description?: string
+  roomCount: number
+}
+
+export interface DormitoryRoom {
+  id: number
+  roomNumber: string
+  buildingId: number
+  buildingName: string
+  capacity: number
+  description?: string
+  occupancy: number
+}
+
+export interface DormitoryAssignment {
+  id: number
+  studentId: number
+  roomId: number
+  checkInDate: string
+  checkOutDate?: string
+  status: 'active' | 'inactive'
+}
+
+export interface RoomStudent {
+  id: number
+  name: string
+  studentId: string
+  major: string
+  gender: string
+  assignmentId: number
+}
+
+export interface RoomDetails {
+  id: number
+  buildingId: number
+  roomNumber: string
+  building: string
+  room: string
+  capacity: number
+  occupancy: number
+  students: RoomStudent[]
+}
+
+// API 响应类型
+export interface GetBuildingsResponse {
+  success: boolean
+  data: DormitoryBuilding[]
+}
+
+export interface GetRoomsResponse {
+  success: boolean
+  data: DormitoryRoom[]
+}
+
+export interface GetRoomDetailsResponse {
+  success: boolean
+  data: RoomDetails
+}
+
+export interface CreateBuildingRequest {
+  name: string
+  gender: 'M' | 'F'
+  description?: string
+}
+
+export interface CreateRoomRequest {
+  roomNumber: string
+  buildingId: number
+  capacity?: number
+  description?: string
+}
+
+export interface AssignRoomRequest {
+  studentId: number
+  roomId: number
+}
+
+export interface GetUnassignedStudentsResponse {
+  success: boolean
+  data: StudentProfile[]
+}
+export interface DormitoryStats {
+  total: number
+  occupied: number
+  available: number
+}
+export interface StatsOverview {
+  studentStats: {
+    total: number
+    reported: number
+    unreported: number
+    pending: number
+  }
+  teacherCount: number
+  dormitoryStats: DormitoryStats
+  majorDistribution: Array<{
+    major: string
+    count: number
+  }>
+  provinceDistribution: Array<{
+    province: string
+    count: number
+  }>
+  studentDetails: Array<{
+    province: string
+    major: string
+    studentId: string
+    name: string
+    gender: string
+    status: string
+    count: number
+  }>
+  stats: {
+    studentCount: number
+    teacherCount: number
+    classCount: number
+    todayVisits: number
+    student_profile?: {
+      student_id: string
+      major: string
+      status: string
+      report_time: string
+    }
+    managedClasses?: number
+    todoCount?: number
   }
 }

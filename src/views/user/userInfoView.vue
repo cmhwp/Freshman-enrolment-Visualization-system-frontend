@@ -66,12 +66,12 @@
         </a-row>
 
         <!-- 学生特有信息 -->
-        <template v-if="formState.role === 'student' && formState.student_profile">
+        <template v-if="formState.role === 'student' && formState">
           <a-divider>学籍信息</a-divider>
           <a-row :gutter="16">
             <a-col :span="12">
               <a-form-item label="学号">
-                <a-input v-model:value="formState.student_profile.student_id" disabled />
+                <a-input v-model:value="formState.student_id" disabled />
               </a-form-item>
             </a-col>
           </a-row>
@@ -79,7 +79,7 @@
             <a-row :gutter="16">
               <a-col :span="12">
                 <a-form-item label="专业">
-                  <a-input v-model:value="formState.student_profile.major" disabled />
+                  <a-input v-model:value="formState.major" disabled />
                 </a-form-item>
               </a-col>
             </a-row>
@@ -87,7 +87,7 @@
             <a-row :gutter="16">
               <a-col :span="12">
                 <a-form-item label="入学日期">
-                  <a-input v-model:value="formState.student_profile.admission_date" disabled />
+                  <a-input v-model:value="formState.admission_date" disabled />
                 </a-form-item>
               </a-col>
             </a-row>
@@ -95,14 +95,14 @@
             <a-row :gutter="16">
               <a-col :span="12">
                 <a-form-item label="预计毕业日期">
-                  <a-input v-model:value="formState.student_profile.graduation_date" disabled />
+                  <a-input v-model:value="formState.graduation_date" disabled />
                 </a-form-item>
               </a-col>
             </a-row>
 
-            <a-form-item label="学籍状态">
-              <a-tag :color="getStatusColor(formState.student_profile.status)">
-                {{ getStatusText(formState.student_profile.status) }}
+            <a-form-item label="报到状态">
+              <a-tag :color="getStatusColor(formState.status)">
+                {{ getStatusText(formState.status) }}
               </a-tag>
             </a-form-item>
           </template>
@@ -189,7 +189,11 @@ const formState = reactive<StudentProfile>({
   province: '',
   gender: undefined,
   class_id: undefined,
-  student_profile: undefined
+  student_id: '',
+  major: '',
+  status: 'pending',
+  admission_date: '',
+  graduation_date: ''
 })
 
 // 密码表单数据
@@ -280,9 +284,9 @@ const handlePasswordChange = async () => {
 // 获取状态文本
 const getStatusText = (status: string) => {
   const statusMap = {
-    active: '在读',
-    graduated: '已毕业',
-    suspended: '休学'
+    pending: '待报到',
+    reported: '已报到',
+    unreported: '未报到'
   }
   return statusMap[status as keyof typeof statusMap] || status
 }
@@ -290,9 +294,9 @@ const getStatusText = (status: string) => {
 // 获取状态标签颜色
 const getStatusColor = (status: string) => {
   const colorMap = {
-    active: 'green',
-    graduated: 'blue',
-    suspended: 'orange'
+    pending: 'green',
+    reported: 'blue',
+    unreported: 'orange'
   }
   return colorMap[status as keyof typeof colorMap] || 'default'
 }

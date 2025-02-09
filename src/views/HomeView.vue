@@ -60,7 +60,7 @@
             <template #title>用户管理</template>
             <a-menu-item key="admin/student-list">学生管理</a-menu-item>
             <a-menu-item key="admin/teacher-list">教师管理</a-menu-item>
-            <a-menu-item key="admin/create-teacher">创建教师</a-menu-item>
+            <a-menu-item key="admin/dormitory-management">宿舍管理</a-menu-item>
           </a-sub-menu>
           <a-sub-menu key="system">
             <template #icon>
@@ -70,6 +70,12 @@
             <a-menu-item key="admin/settings">系统设置</a-menu-item>
             <a-menu-item key="admin/logs">操作日志</a-menu-item>
           </a-sub-menu>
+          <a-menu-item key="admin/enrollment-stats">
+            <template #icon>
+              <bar-chart-outlined />
+            </template>
+            <span>新生报到统计</span>
+          </a-menu-item>
         </template>
 
         <a-menu-item key="user/profile">
@@ -145,6 +151,8 @@ import { useRouter } from 'vue-router'
 import { VueLogo } from '@/components/icons'
 import { message } from 'ant-design-vue'
 import { useUserStore } from '@/stores'
+import { useRoute } from 'vue-router'
+import { watchEffect } from 'vue'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -165,6 +173,13 @@ const handleLogout = () => {
   router.push('/login')
 }
 
+const route = useRoute()
+watchEffect(() => {
+  const path = route.path.slice(1)
+  if (path) {
+    selectedKeys.value = [path]
+  }
+})
 // 根据当前路由设置选中的菜单项
 onMounted(() => {
   const path = router.currentRoute.value.path.slice(1) // 移除开头的 /

@@ -10,7 +10,21 @@ export const LOG_TYPES = {
   update_profile: '更新个人信息',
   update_password: '修改密码',
   update_settings: '更新系统设置',
-  view_scores: '查看成绩'
+  view_scores: '查看成绩',
+  download_template: '下载模板',
+  import_teachers: '导入教师',
+  import_students: '导入学生',
+  reset_password: '重置密码',
+  student_report: '学生报到',
+  delete_student: '删除学生',
+  system_auto: '系统自动操作',
+  create_building: '创建宿舍楼',
+  create_room: '创建宿舍房间',
+  update_room: '更新宿舍房间',
+  delete_room: '删除宿舍房间',
+  checkout: '退宿',
+  change_room: '调整宿舍',
+  assign_room: '分配宿舍'
 }
 
 export type LogType = keyof typeof LOG_TYPES

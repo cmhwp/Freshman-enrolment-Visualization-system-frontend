@@ -33,5 +33,12 @@ export const studentApi = {
     return request.get<any, { success: boolean; data: SchoolRanking }>(
       '/student/school-ranking'
     )
+  },
+
+  // 学生报到
+  report: () => {
+    return request.post<any, { success: boolean; message: string }>(
+      '/student/report'
+    )
   }
 }

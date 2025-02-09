@@ -52,40 +52,57 @@ const router = createRouter({
         //   meta: { role: 'teacher' }
         // },
 
-        // // 管理员路由
-        // {
-        //   path: 'admin/student-list',
-        //   name: 'adminStudentList',
-        //   component: () => import('../views/admin/StudentListView.vue'),
-        //   meta: { role: 'admin' }
-        // },
+        // 管理员路由
         {
-          path: 'admin/teacher-list',
-          name: 'adminTeacherList',
-          component: () => import('@/views/admin/TeacherList.vue'),
-          meta: { role: 'admin' }
-        },
-        // {
-        //   path: 'admin/settings',
-        //   name: 'adminSettings',
-        //   component: () => import('../views/admin/SettingsView.vue'),
-        //   meta: { role: 'admin' }
-        // },
-        {
-          path: 'admin/create-teacher',
-          name: 'CreateTeacher',
-          component: () => import('@/views/admin/CreateTeacher.vue'),
-          meta: {
-            title: '创建教师',
-            requiresAuth: true,
-            roles: ['admin']
-          }
-        },
-        {
-          path: 'admin/logs',
-          name: 'adminLogs',
-          component: () => import('../views/admin/SystemLogs.vue'),
-          meta: { role: 'admin' }
+          path: 'admin',
+          children: [
+            {
+              path: 'settings',
+              name: 'systemSettings',
+              component: () => import('@/views/admin/SystemSettings.vue'),
+              meta: { role: 'admin' }
+            },
+            {
+              path: 'student-list',
+              name: 'adminStudentList',
+              component: () => import('@/views/admin/StudentList.vue'),
+              meta: { role: 'admin' }
+            },
+            {
+              path: 'teacher-list',
+              name: 'adminTeacherList',
+              component: () => import('@/views/admin/TeacherList.vue'),
+              meta: { role: 'admin' }
+            },
+            {
+              path: 'create-teacher',
+              name: 'CreateTeacher',
+              component: () => import('@/views/admin/CreateTeacher.vue'),
+              meta: {
+                title: '创建教师',
+                requiresAuth: true,
+                roles: ['admin']
+              }
+            },
+            {
+              path: 'logs',
+              name: 'adminLogs',
+              component: () => import('../views/admin/SystemLogs.vue'),
+              meta: { role: 'admin' }
+            },
+            {
+              path: 'enrollment-stats',
+              name: 'enrollmentStats',
+              component: () => import('@/views/admin/EnrollmentStats.vue'),
+              meta: { role: 'admin', title: '新生报到统计' }
+            },
+            {
+              path: 'dormitory-management',
+              name: 'dormitoryManagement',
+              component: () => import('@/views/admin/DormitoryManagement.vue'),
+              meta: { role: 'admin', title: '宿舍管理' }
+            },
+          ]
         },
 
         // 用户信息路由

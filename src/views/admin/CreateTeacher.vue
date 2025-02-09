@@ -100,7 +100,9 @@ import type { FormInstance } from 'ant-design-vue'
 import { adminApi } from '@/api/admin'
 import { departments, titles, researchAreas } from '@/constants/teacherRelate'
 import { provinces } from '@/constants/provinces'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const formRef = ref<FormInstance>()
 const submitting = ref(false)
 
@@ -158,6 +160,7 @@ const handleSubmit = async () => {
 
     if (response.success) {
       message.success('教师账号创建成功')
+      router.push('/admin/teacher-list')
       formRef.value?.resetFields()
     } else {
       message.error(response.message || '创建失败')

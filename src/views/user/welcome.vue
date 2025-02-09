@@ -22,7 +22,7 @@
       <template v-if="userRole === 'admin'">
         <a-col :span="6">
           <a-card class="stat-card">
-            <statistic title="学生总数" :value="stats.studentCount">
+            <statistic title="学生总数" :value="stats.studentStats.total">
               <template #prefix>
                 <user-outlined />
               </template>
@@ -40,7 +40,7 @@
         </a-col>
         <a-col :span="6">
           <a-card class="stat-card">
-            <statistic title="班级总数" :value="stats.classCount">
+            <statistic title="班级总数" :value="stats.stats.classCount">
               <template #prefix>
                 <apartment-outlined />
               </template>
@@ -49,7 +49,7 @@
         </a-col>
         <a-col :span="6">
           <a-card class="stat-card">
-            <statistic title="今日访问" :value="stats.todayVisits">
+            <statistic title="今日访问" :value="stats.stats.todayVisits">
               <template #prefix>
                 <eye-outlined />
               </template>
@@ -62,7 +62,7 @@
       <template v-if="userRole === 'teacher'">
         <a-col :span="8">
           <a-card class="stat-card">
-            <statistic title="管理班级数" :value="stats.managedClasses">
+            <statistic title="管理班级数" :value="stats.stats.managedClasses">
               <template #prefix>
                 <team-outlined />
               </template>
@@ -71,7 +71,7 @@
         </a-col>
         <a-col :span="8">
           <a-card class="stat-card">
-            <statistic title="学生总数" :value="stats.studentCount">
+            <statistic title="学生总数" :value="stats.studentStats.total">
               <template #prefix>
                 <user-outlined />
               </template>
@@ -80,7 +80,7 @@
         </a-col>
         <a-col :span="8">
           <a-card class="stat-card">
-            <statistic title="待处理事项" :value="stats.todoCount">
+            <statistic title="待处理事项" :value="stats.stats.todoCount">
               <template #prefix>
                 <notification-outlined />
               </template>
@@ -93,7 +93,7 @@
       <template v-if="userRole === 'student'">
         <a-col :span="8">
           <a-card class="stat-card">
-            <statistic title="学号" :value="stats.student_profile?.student_id">
+            <statistic title="学号" :value="stats.stats.student_profile?.student_id">
               <template #prefix>
                 <idcard-outlined />
               </template>
@@ -102,7 +102,7 @@
         </a-col>
         <a-col :span="8">
           <a-card class="stat-card">
-            <statistic title="专业" :value="stats.student_profile?.major">
+            <statistic title="专业" :value="stats.stats.student_profile?.major">
               <template #prefix>
                 <book-outlined />
               </template>
@@ -111,7 +111,11 @@
         </a-col>
         <a-col :span="8">
           <a-card class="stat-card">
-            <statistic title="学籍状态" :value="stats.student_profile?.status === 'active' ? '在读' : '已毕业'">
+            <statistic
+              title="报到状态"
+              :value="stats.stats.student_profile?.status === 'unreported' ? '未报到' : '已报到'"
+              :value-style="{ color: stats.stats.student_profile?.status === 'unreported' ? '#ff4d4f' : '#52c41a' }"
+            >
               <template #prefix>
                 <solution-outlined />
               </template>
@@ -119,12 +123,51 @@
           </a-card>
         </a-col>
       </template>
+
+      <!-- 报到卡片 -->
+      <a-card v-if="userRole === 'student'" class="report-card">
+        <template #title>
+          <span>新生报到</span>
+        </template>
+        <div class="report-status">
+          <a-alert
+            v-if="studentInfo.status === 'unreported'"
+            message="您尚未报到"
+            description="请尽快完成报到"
+            type="warning"
+            show-icon
+          />
+          <a-alert
+            v-else-if="studentInfo.status === 'reported'"
+            message="您已完成报到"
+            :description="`报到时间：${dayjs(studentInfo.report_time).format('YYYY-MM-DD HH:mm:ss')}`"
+            type="success"
+            show-icon
+          />
+          <a-alert
+            v-else
+            message="您未按时报到"
+            description="请尽快联系辅导员"
+            type="error"
+            show-icon
+          />
+        </div>
+
+        <a-button
+          v-if="studentInfo.status === 'unreported'"
+          type="primary"
+          :loading="reporting"
+          @click="handleReport"
+        >
+          立即报到
+        </a-button>
+      </a-card>
     </a-row>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watchEffect } from 'vue'
 import { Statistic } from 'ant-design-vue'
 import {
   UserOutlined,
@@ -140,26 +183,69 @@ import { useUserStore } from '@/stores'
 import { statsApi } from '@/api/stats'
 import { message } from 'ant-design-vue'
 import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
+import { studentApi } from '@/api/student'
+import type { StatsOverview } from '@/types/api'
 
 const userStore = useUserStore()
 const userRole = computed(() => userStore.userRole)
 const userName = computed(() => userStore.userName)
 const lastLoginTime = ref<string>('')
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 // 统计数据
-const stats = ref({
-  studentCount: 0,
+const stats = ref<StatsOverview>({
+  studentStats: {
+    total: 0,
+    reported: 0,
+    unreported: 0,
+    pending: 0
+  },
   teacherCount: 0,
-  classCount: 0,
-  todayVisits: 0,
-  managedClasses: 0,
-  todoCount: 0,
-  student_profile: {
-    student_id: '',
-    major: '',
-    status: 'active'
+  dormitoryStats: {
+    total: 0,
+    occupied: 0,
+    available: 0
+  },
+  majorDistribution: [],
+  provinceDistribution: [],
+  studentDetails: [],
+  stats: {
+    studentCount: 0,
+    teacherCount: 0,
+    classCount: 0,
+    todayVisits: 0,
+    student_profile: {
+      student_id: '',
+      major: '',
+      status: 'unreported', // pending-待报到, reported-已报到, unreported-未报到
+      report_time: ''
+    },
+    managedClasses: 0,
+    todoCount: 0
   }
 })
+
+const reporting = ref(false)
+
+// 学生信息
+const studentInfo = ref({
+  status: 'unreported',
+    report_time: ''
+})
+
+// 检查报到状态并提醒
+const checkReportStatus = () => {
+  if (userRole.value === 'student' && stats.value.stats.student_profile?.status === 'unreported') {
+    message.warning({
+      content: '您尚未完成报到，请尽快报到！',
+      duration: 5,
+      key: 'report_reminder'
+    })
+  }
+}
 
 // 获取欢迎消息
 const getWelcomeMessage = () => {
@@ -178,15 +264,16 @@ const getWelcomeMessage = () => {
 // 获取统计数据
 const fetchStats = async () => {
   try {
-    // 获取统计概览
     const statsRes = await statsApi.getOverview()
-    console.log(statsRes.data)
     if (statsRes.success) {
       stats.value = { ...stats.value, ...statsRes.data }
+      // 获取数据后检查报到状态
+      checkReportStatus()
     }
 
     // 获取上次登录时间
     const loginRes = await statsApi.getLastLogin()
+    console.log(loginRes)
     if (loginRes.success && loginRes.data.lastLoginTime) {
       lastLoginTime.value = dayjs(loginRes.data.lastLoginTime).format('YYYY-MM-DD HH:mm:ss')
     }
@@ -195,7 +282,40 @@ const fetchStats = async () => {
   }
 }
 
+// 获取学生信息
+const fetchStudentInfo = async () => {
+  try {
+    const res = await statsApi.getOverview()
+    console.log(res)
+    if (res.success) {
+      studentInfo.value = {
+        status: res.data.stats.student_profile?.status || 'unreported',
+        report_time: res.data.stats.student_profile?.report_time || ''
+      }
+    }
+    console.log(dayjs(studentInfo.value.report_time).tz('Asia/Shanghai').format('YYYY-MM-DD HH:mm:ss'))
+  } catch (error) {
+    message.error('获取学生信息失败')
+  }
+}
+
+const handleReport = async () => {
+  try {
+    reporting.value = true
+    const res = await studentApi.report()
+    if (res.success) {
+      message.success('报到成功')
+      // 刷新学生信息
+      await fetchStudentInfo()
+    }
+  } catch (error: any) {
+    message.error(error.message || '报到失败')
+  } finally {
+    reporting.value = false
+  }
+}
 onMounted(() => {
+  fetchStudentInfo()
   fetchStats()
 })
 </script>
@@ -233,5 +353,13 @@ onMounted(() => {
 :deep(.ant-statistic-content) {
   font-size: 24px;
   color: rgba(0, 0, 0, 0.85);
+}
+
+.report-card {
+  margin-top: 24px;
+
+  .report-status {
+    margin-bottom: 24px;
+  }
 }
 </style>
