@@ -40,7 +40,7 @@
               <team-outlined />
             </template>
             <template #title>班级管理</template>
-            <a-menu-item key="teacher/class-list">班级列表</a-menu-item>
+            <a-menu-item key="teacher/class-management">班级列表</a-menu-item>
             <a-menu-item key="teacher/score-management">成绩管理</a-menu-item>
           </a-sub-menu>
           <a-menu-item key="teacher/statistics">

@@ -1,28 +1,8 @@
-export const departments = [
-  '计算机学院',
-  '信息工程学院',
-  '电子工程学院',
-  '自动化学院',
-  '机械工程学院',
-  '材料科学学院',
-  '物理与电子信息学院',
-  '化学化工学院',
-  '生命科学学院',
-  '数学与统计学院',
-  '外国语学院',
-  '法学院',
-  '商学院',
-  '艺术学院',
-  '教育学院',
-  '体育学院',
-  '马克思主义学院',
-  '国际教育学院',
-  '继续教育学院',
-  '研究生院',
-  '国际合作与交流处',
-  '科学技术研究院',
-] as const
+import { teacherApi } from '@/api/teacher'
 
+const res = await teacherApi.getOptions()
+export const departments = res.data.departments
+export const majors = res.data.majors
 export const titles = [
   '教授',
   '副教授',

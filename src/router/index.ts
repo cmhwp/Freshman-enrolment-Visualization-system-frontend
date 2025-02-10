@@ -22,7 +22,7 @@ const router = createRouter({
         {
           path: 'student/scores',
           name: 'studentScores',
-          component: () => import('@/views/student/ScoresView.vue'),
+          component: () => import('@/views/student/ScoreView.vue'),
           meta: { role: 'student' }
         },
         {
@@ -32,7 +32,27 @@ const router = createRouter({
           meta: { role: 'student' }
         },
 
-        // // 教师路由
+        // 教师路由
+        {path: 'teacher',
+          children: [
+            {
+              path: 'score-management',
+              name: 'scoreManagement',
+              component: () => import('../views/teacher/ScoreManagement.vue'),
+              meta: { role: 'teacher' }
+            },
+            {
+              path: 'class-management',
+              name: 'ClassManagement',
+              component: () => import('@/views/teacher/ClassManagement.vue'),
+              meta: {
+                title: '班级管理',
+                requiresAuth: true,
+                role: 'teacher'
+              }
+            }
+          ]
+        },
         // {
         //   path: 'teacher/class-list',
         //   name: 'teacherClassList',

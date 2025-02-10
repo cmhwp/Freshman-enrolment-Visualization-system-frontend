@@ -314,3 +314,77 @@ export interface StatsOverview {
     todoCount?: number
   }
 }
+
+// 班级相关类型
+export interface ClassInfo {
+  id: number
+  class_name: string
+  major: string
+  department: string
+  year: number
+  capacity: number
+  assigned_students: number
+  teacherId: number
+  teacherName: string
+  studentCount: number
+  students?: StudentProfile[]
+  createdAt: string
+  updatedAt: string
+}
+
+// 课程相关类型
+export interface CourseInfo {
+  id: number
+  name: string
+  code: string
+  credits: number
+  teacherId: number
+  teacherName: string
+  semester: string
+  description?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CourseScore {
+  id: number
+  courseId: number
+  studentId: number
+  studentName: string
+  studentNumber: string
+  score: number
+  createdAt: string
+  updatedAt: string
+}
+
+// 成绩相关类型
+export interface Score {
+  id: number
+  studentId: number
+  studentName: string
+  studentNumber: string
+  year: number
+  totalScore: number
+  chinese?: number
+  math?: number
+  english?: number
+  physics?: number
+  chemistry?: number
+  biology?: number
+  provinceRank?: number
+  majorRank?: number
+  createdAt?: string
+  updatedAt?: string
+}
+
+// options
+export interface OptionsResponse {
+  departments: string[]  // 院系选项
+  majors: string[]      // 专业选项
+  years: number[]       // 年级选项
+}
+
+export interface GetOptionsResponse {
+  success: boolean
+  data: OptionsResponse
+}
