@@ -71,7 +71,7 @@
         </a-col>
         <a-col :span="8">
           <a-card class="stat-card">
-            <statistic title="学生总数" :value="stats.studentStats.total">
+            <statistic title="管理学生数" :value="stats.stats.managedStudents">
               <template #prefix>
                 <user-outlined />
               </template>
@@ -113,8 +113,8 @@
           <a-card class="stat-card">
             <statistic
               title="报到状态"
-              :value="stats.stats.student_profile?.status === 'unreported' ? '未报到' : '已报到'"
-              :value-style="{ color: stats.stats.student_profile?.status === 'unreported' ? '#ff4d4f' : '#52c41a' }"
+              :value="getStatusText(stats.stats.student_profile?.status || 'unreported')"
+              :value-style="{ color: getStatusColor(stats.stats.student_profile?.status || 'unreported') }"
             >
               <template #prefix>
                 <solution-outlined />
@@ -131,10 +131,17 @@
         </template>
         <div class="report-status">
           <a-alert
-            v-if="studentInfo.status === 'unreported'"
-            message="您尚未报到"
-            description="请尽快完成报到"
-            type="warning"
+            v-if="studentInfo.status === 'pending'"
+            message="待报到"
+            description="请在规定时间内完成报到"
+            type="info"
+            show-icon
+          />
+          <a-alert
+            v-else-if="studentInfo.status === 'unreported'"
+            message="您未按时报到"
+            description="请联系辅导员处理"
+            type="error"
             show-icon
           />
           <a-alert
@@ -144,17 +151,10 @@
             type="success"
             show-icon
           />
-          <a-alert
-            v-else
-            message="您未按时报到"
-            description="请尽快联系辅导员"
-            type="error"
-            show-icon
-          />
         </div>
 
         <a-button
-          v-if="studentInfo.status === 'unreported'"
+          v-if="studentInfo.status === 'pending'"
           type="primary"
           :loading="reporting"
           @click="handleReport"
@@ -187,7 +187,7 @@ import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import { studentApi } from '@/api/student'
 import type { StatsOverview } from '@/types/api'
-
+import { watch } from 'vue'
 const userStore = useUserStore()
 const userRole = computed(() => userStore.userRole)
 const userName = computed(() => userStore.userName)
@@ -224,6 +224,7 @@ const stats = ref<StatsOverview>({
       report_time: ''
     },
     managedClasses: 0,
+    managedStudents: 0,
     todoCount: 0
   }
 })
@@ -233,17 +234,25 @@ const reporting = ref(false)
 // 学生信息
 const studentInfo = ref({
   status: 'unreported',
-    report_time: ''
+  report_time: ''
 })
 
 // 检查报到状态并提醒
 const checkReportStatus = () => {
-  if (userRole.value === 'student' && stats.value.stats.student_profile?.status === 'unreported') {
-    message.warning({
-      content: '您尚未完成报到，请尽快报到！',
-      duration: 5,
-      key: 'report_reminder'
-    })
+  if (userRole.value === 'student') {
+    if (stats.value.stats.student_profile?.status === 'pending') {
+      message.warning({
+        content: '您尚未完成报到，请尽快报到！',
+        duration: 5,
+        key: 'report_reminder'
+      })
+    } else if (stats.value.stats.student_profile?.status === 'unreported') {
+      message.error({
+        content: '您未按时报到，请联系辅导员处理！',
+        duration: 5,
+        key: 'report_reminder'
+      })
+    }
   }
 }
 
@@ -299,14 +308,48 @@ const fetchStudentInfo = async () => {
   }
 }
 
+// 获取状态文本
+const getStatusText = (status: string) => {
+  const textMap: Record<string, string> = {
+    pending: '待报到',
+    reported: '已报到',
+    unreported: '未报到'
+  }
+  return textMap[status] || status
+}
+
+// 获取状态颜色
+const getStatusColor = (status: string) => {
+  const colorMap: Record<string, string> = {
+    pending: '#1890ff',    // 蓝色
+    reported: '#52c41a',   // 绿色
+    unreported: '#ff4d4f'  // 红色
+  }
+  return colorMap[status] || '#d9d9d9'
+}
+
+// 监听报到状态
+watch(() => studentInfo.value.status, (newStatus) => {
+  if (newStatus === 'reported') {
+    fetchStudentInfo()
+  }
+})
+
+
+// 处理报到
 const handleReport = async () => {
+  if (studentInfo.value.status === 'reported') return
+
+  reporting.value = true
   try {
-    reporting.value = true
     const res = await studentApi.report()
     if (res.success) {
       message.success('报到成功')
-      // 刷新学生信息
-      await fetchStudentInfo()
+      // 更新状态
+      studentInfo.value.status = 'reported'
+      studentInfo.value.report_time = new Date().toISOString()
+      // 刷新数据
+      await fetchStats()
     }
   } catch (error: any) {
     message.error(error.message || '报到失败')

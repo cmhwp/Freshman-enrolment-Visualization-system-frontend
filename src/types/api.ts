@@ -311,6 +311,7 @@ export interface StatsOverview {
       report_time: string
     }
     managedClasses?: number
+    managedStudents?: number
     todoCount?: number
   }
 }
@@ -387,4 +388,35 @@ export interface OptionsResponse {
 export interface GetOptionsResponse {
   success: boolean
   data: OptionsResponse
+}
+
+export interface Todo {
+  id: number
+  title: string
+  content: string
+  status: 'pending'  | 'completed' | 'rejected'
+  student_id: number
+  teacher_id: number
+  class_name: string
+  created_at: string
+  updated_at: string
+  comment?: string  // 教师反馈
+  student?: string  // 学生姓名
+  teacher?: string  // 教师姓名
+}
+export  interface ReportStatus {
+  students: Array<{
+    id: number
+    name: string
+    student_number: string
+    class_name: string
+    report_time: string | null
+    status: 'pending' | 'reported' | 'unreported'
+  }>
+  statistics: {
+    total: number
+    reported: number
+    unreported: number
+    report_rate: string
+  }
 }

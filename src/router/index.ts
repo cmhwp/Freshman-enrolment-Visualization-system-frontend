@@ -31,6 +31,12 @@ const router = createRouter({
           component: () => import('@/views/student/RankingView.vue'),
           meta: { role: 'student' }
         },
+        {
+          path: 'student/todo-list',
+          name: 'studentTodoList',
+          component: () => import('@/views/student/TodoList.vue'),
+          meta: { role: 'student' }
+        },
 
         // 教师路由
         {path: 'teacher',
@@ -50,6 +56,24 @@ const router = createRouter({
                 requiresAuth: true,
                 role: 'teacher'
               }
+            },
+            {
+              path: 'score-analysis',
+              name: 'scoreAnalysis',
+              component: () => import('@/views/teacher/ScoreAnalysis.vue'),
+              meta: { role: 'teacher' }
+            },
+            {
+              path: 'todo-list',
+              name: 'todoList',
+              component: () => import('@/views/teacher/TodoList.vue'),
+              meta: { role: 'teacher' }
+            },
+            {
+              path: 'report-status',
+              name: 'reportStatus',
+              component: () => import('@/views/teacher/ReportStatus.vue'),
+              meta: { role: 'teacher' }
             }
           ]
         },

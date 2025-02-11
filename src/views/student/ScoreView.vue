@@ -6,7 +6,7 @@
         <a-descriptions-item label="总分">
           {{ score?.totalScore }}
         </a-descriptions-item>
-        <a-descriptions-item label="省排名">
+        <a-descriptions-item label="学校排名">
           {{ score?.provinceRank }}
         </a-descriptions-item>
         <a-descriptions-item label="专业排名">

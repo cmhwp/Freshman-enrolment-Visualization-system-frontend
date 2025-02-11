@@ -11,154 +11,170 @@
       </a-space>
     </div>
 
-    <a-card title="学生成绩管理">
-      <template #extra>
-        <a-space>
-          <import-users />
-        </a-space>
-      </template>
-
-      <!-- 成绩统计卡片 -->
-      <a-row :gutter="16" class="statistics-cards">
-        <a-col :span="6">
-          <a-card>
-            <statistic
-              title="平均分"
-              :value="statistics.averageScore"
-              :precision="1"
-            />
-          </a-card>
-        </a-col>
-        <a-col :span="6">
-          <a-card>
-            <statistic
-              title="最高分"
-              :value="statistics.highestScore"
-              :precision="1"
-            />
-          </a-card>
-        </a-col>
-        <a-col :span="6">
-          <a-card>
-            <statistic
-              title="最低分"
-              :value="statistics.lowestScore"
-              :precision="1"
-            />
-          </a-card>
-        </a-col>
-        <a-col :span="6">
-          <a-card>
-            <statistic
-              title="学生总数"
-              :value="statistics.totalStudents"
-            />
-          </a-card>
-        </a-col>
-      </a-row>
-
-      <!-- 成绩分布图表 -->
-      <div class="charts-container">
-        <a-row :gutter="16">
-          <a-col :span="12">
-            <div ref="scoreDistributionChart" class="chart"></div>
-          </a-col>
-          <a-col :span="12">
-            <div ref="subjectAverageChart" class="chart"></div>
-          </a-col>
-        </a-row>
-      </div>
-
-      <!-- 成绩列表 -->
-      <a-table
-        :columns="columns"
-        :data-source="scoreList"
-        :loading="loading"
-        :pagination="false"
-        row-key="id"
+    <!-- 添加班级切换的 Tabs -->
+    <a-tabs v-model:activeKey="activeClassId" @change="handleClassChange">
+      <a-tab-pane
+        v-for="classInfo in classList"
+        :key="classInfo.id"
+        :tab="classInfo.class_name"
+        type="card"
       >
-        <template #bodyCell="{ column, record }">
-          <template v-if="column.key === 'action'">
+        <a-card :title="`${classInfo.class_name}成绩管理`">
+          <template #extra>
             <a-space>
-              <a @click="handleEdit(record)">编辑</a>
-              <a-divider type="vertical" />
-              <a-popconfirm
-                title="确定删除该成绩记录吗？"
-                @confirm="handleDelete(record)"
-              >
-                <a class="danger">删除</a>
-              </a-popconfirm>
+              <import-users />
             </a-space>
           </template>
-        </template>
-      </a-table>
-    </a-card>
 
-    <!-- 成绩详情对话框 -->
-    <a-modal
-      v-model:visible="detailsModalVisible"
-      title="成绩详情"
-      :footer="null"
-      width="800px"
-    >
-      <a-descriptions bordered>
-        <a-descriptions-item label="学号">
-          {{ selectedScore?.studentNumber }}
-        </a-descriptions-item>
-        <a-descriptions-item label="姓名">
-          {{ selectedScore?.studentName }}
-        </a-descriptions-item>
-        <a-descriptions-item label="年份">
-          {{ selectedScore?.year }}
-        </a-descriptions-item>
-        <a-descriptions-item label="总分">
-          {{ selectedScore?.totalScore }}
-        </a-descriptions-item>
-        <a-descriptions-item label="省排名">
-          {{ selectedScore?.provinceRank }}
-        </a-descriptions-item>
-        <a-descriptions-item label="专业排名">
-          {{ selectedScore?.majorRank }}
-        </a-descriptions-item>
-        <a-descriptions-item label="语文">
-          {{ selectedScore?.chinese }}
-        </a-descriptions-item>
-        <a-descriptions-item label="数学">
-          {{ selectedScore?.math }}
-        </a-descriptions-item>
-        <a-descriptions-item label="英语">
-          {{ selectedScore?.english }}
-        </a-descriptions-item>
-        <a-descriptions-item label="物理">
-          {{ selectedScore?.physics }}
-        </a-descriptions-item>
-        <a-descriptions-item label="化学">
-          {{ selectedScore?.chemistry }}
-        </a-descriptions-item>
-        <a-descriptions-item label="生物">
-          {{ selectedScore?.biology }}
-        </a-descriptions-item>
-      </a-descriptions>
+          <!-- 成绩统计卡片 -->
+          <a-row :gutter="16" class="statistics-cards">
+            <a-col :span="6">
+              <a-card>
+                <a-statistic
+                  title="平均分"
+                  :value="statistics.averageScore"
+                  :precision="1"
+                />
+              </a-card>
+            </a-col>
+            <a-col :span="6">
+              <a-card>
+                <a-statistic
+                  title="最高分"
+                  :value="statistics.highestScore"
+                  :precision="1"
+                />
+              </a-card>
+            </a-col>
+            <a-col :span="6">
+              <a-card>
+                <a-statistic
+                  title="最低分"
+                  :value="statistics.lowestScore"
+                  :precision="1"
+                />
+              </a-card>
+            </a-col>
+            <a-col :span="6">
+              <a-card>
+                <a-statistic
+                  title="学生总数"
+                  :value="statistics.totalStudents"
+                />
+              </a-card>
+            </a-col>
+          </a-row>
 
-      <!-- 个人成绩雷达图 -->
-      <div ref="radarChart" class="radar-chart"></div>
-    </a-modal>
+          <!-- 成绩列表 -->
+          <a-table
+            :columns="columns"
+            :data-source="allScores"
+            :loading="loading"
+            :pagination="false"
+            row-key="id"
+          >
+            <template #bodyCell="{ column, record }">
+              <template v-if="column.key === 'action'">
+                <a-space>
+                  <a @click="handleEdit(record)">编辑</a>
+                  <a-divider type="vertical" />
+                  <a-popconfirm
+                    title="确定删除该成绩记录吗？"
+                    @confirm="handleDelete(record)"
+                  >
+                    <a class="danger">删除</a>
+                  </a-popconfirm>
+                </a-space>
+              </template>
+            </template>
+          </a-table>
+        </a-card>
+      </a-tab-pane>
+    </a-tabs>
 
     <!-- 导入成绩弹窗 -->
     <import-scores
       v-model:visible="importVisible"
+      :class-id="activeClassId || 0"
       @success="handleImportSuccess"
     />
+
+    <!-- 编辑成绩弹窗 -->
+    <a-modal
+      v-model:visible="editModalVisible"
+      title="编辑成绩"
+      @ok="handleSaveEdit"
+      :confirmLoading="editLoading"
+    >
+      <a-form v-if="editForm" layout="vertical">
+        <a-form-item label="学号">
+          <a-input v-model:value="editForm.studentNumber" disabled />
+        </a-form-item>
+        <a-form-item label="姓名">
+          <a-input v-model:value="editForm.studentName" disabled />
+        </a-form-item>
+        <a-form-item label="年份">
+          <a-input v-model:value="editForm.year" disabled />
+        </a-form-item>
+        <a-form-item label="语文">
+          <a-input-number
+            v-model:value="editForm.chinese"
+            :min="0"
+            :max="150"
+            style="width: 100%"
+          />
+        </a-form-item>
+        <a-form-item label="数学">
+          <a-input-number
+            v-model:value="editForm.math"
+            :min="0"
+            :max="150"
+            style="width: 100%"
+          />
+        </a-form-item>
+        <a-form-item label="英语">
+          <a-input-number
+            v-model:value="editForm.english"
+            :min="0"
+            :max="150"
+            style="width: 100%"
+          />
+        </a-form-item>
+        <a-form-item label="物理">
+          <a-input-number
+            v-model:value="editForm.physics"
+            :min="0"
+            :max="100"
+            style="width: 100%"
+          />
+        </a-form-item>
+        <a-form-item label="化学">
+          <a-input-number
+            v-model:value="editForm.chemistry"
+            :min="0"
+            :max="100"
+            style="width: 100%"
+          />
+        </a-form-item>
+        <a-form-item label="生物">
+          <a-input-number
+            v-model:value="editForm.biology"
+            :min="0"
+            :max="100"
+            style="width: 100%"
+          />
+        </a-form-item>
+      </a-form>
+    </a-modal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, nextTick } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { message } from 'ant-design-vue'
-import type { Score } from '@/types/api'
+import type { Score, ClassInfo } from '@/types/api'
 import { teacherApi } from '@/api'
-import * as echarts from 'echarts'
-
+import { watch } from 'vue'
 import ImportScores from '@/components/ImportScores.vue'
 
 const columns = [
@@ -225,156 +241,84 @@ const importVisible = ref(false)
 const detailsModalVisible = ref(false)
 const selectedScore = ref<Score | null>(null)
 
-// 图表实例
-let scoreDistributionChart: echarts.ECharts | null = null
-let subjectAverageChart: echarts.ECharts | null = null
-let radarChart: echarts.ECharts | null = null
+// 添加新的响应式变量
+const classList = ref<ClassInfo[]>([])
+const activeClassId = ref<number>()
+const allScores = ref<Score[]>([])
 
-// 统计数据计算
-const statistics = computed(() => {
-  if (!scoreList.value.length) {
-    return {
+const statistics = ref({
+  averageScore: 0,
+  highestScore: 0,
+  lowestScore: 0,
+  totalStudents: 0
+})
+
+// 添加编辑对话框相关的响应式变量
+const editModalVisible = ref(false)
+const editForm = ref<Score | null>(null)
+const editLoading = ref(false)
+
+// 修改 watch，移除图表相关调用
+watch(activeClassId, (newVal) => {
+  console.log("activeClassId",newVal)
+  fetchScores()
+})
+
+const updateStatistics = () => {
+  const scores = allScores.value
+  if (scores.length === 0) {
+    statistics.value = {
       averageScore: 0,
       highestScore: 0,
       lowestScore: 0,
       totalStudents: 0
     }
+    return
   }
 
-  const totalScores = scoreList.value.map(s => s.totalScore)
-  return {
-    averageScore: Number((totalScores.reduce((a, b) => a + b, 0) / totalScores.length).toFixed(1)),
-    highestScore: Math.max(...totalScores),
-    lowestScore: Math.min(...totalScores),
-    totalStudents: scoreList.value.length
+  const totalScores = scores.reduce((sum, score) => sum + score.totalScore, 0)
+  statistics.value = {
+    averageScore: Number((totalScores / scores.length).toFixed(1)),
+    highestScore: Math.max(...scores.map(s => s.totalScore)),
+    lowestScore: Math.min(...scores.map(s => s.totalScore)),
+    totalStudents: scores.length
   }
-})
-
-// 初始化成绩分布图表
-const initScoreDistributionChart = () => {
-  const chartDom = document.querySelector('.score-management .chart') as HTMLElement
-  if (!chartDom) return
-
-  scoreDistributionChart = echarts.init(chartDom)
-  const option = {
-    title: {
-      text: '成绩分布'
-    },
-    tooltip: {
-      trigger: 'axis'
-    },
-    xAxis: {
-      type: 'category',
-      data: ['<500', '500-550', '550-600', '600-650', '650-700', '≥700']
-    },
-    yAxis: {
-      type: 'value'
-    },
-    series: [
-      {
-        data: calculateScoreDistribution(),
-        type: 'bar'
-      }
-    ]
-  }
-  scoreDistributionChart.setOption(option)
 }
 
-// 初始化学科平均分图表
-const initSubjectAverageChart = () => {
-  const chartDom = document.querySelectorAll('.score-management .chart')[1] as HTMLElement
-  if (!chartDom) return
-
-  subjectAverageChart = echarts.init(chartDom)
-  const option = {
-    title: {
-      text: '各科平均分'
-    },
-    tooltip: {
-      trigger: 'axis'
-    },
-    radar: {
-      indicator: [
-        { name: '语文', max: 150 },
-        { name: '数学', max: 150 },
-        { name: '英语', max: 150 },
-        { name: '物理', max: 100 },
-        { name: '化学', max: 100 },
-        { name: '生物', max: 100 }
-      ]
-    },
-    series: [
-      {
-        type: 'radar',
-        data: [
-          {
-            value: calculateSubjectAverages(),
-            name: '平均分'
-          }
-        ]
-      }
-    ]
-  }
-  subjectAverageChart.setOption(option)
-}
-
-// 计算成绩分布
-const calculateScoreDistribution = () => {
-  const distribution = [0, 0, 0, 0, 0, 0]
-  scoreList.value.forEach(score => {
-    if (score.totalScore < 500) distribution[0]++
-    else if (score.totalScore < 550) distribution[1]++
-    else if (score.totalScore < 600) distribution[2]++
-    else if (score.totalScore < 650) distribution[3]++
-    else if (score.totalScore < 700) distribution[4]++
-    else distribution[5]++
-  })
-  return distribution
-}
-
-// 计算各科平均分
-const calculateSubjectAverages = () => {
-  if (!scoreList.value.length) return [0, 0, 0, 0, 0, 0]
-
-  const sum = {
-    chinese: 0,
-    math: 0,
-    english: 0,
-    physics: 0,
-    chemistry: 0,
-    biology: 0
-  }
-
-  scoreList.value.forEach(score => {
-    sum.chinese += score.chinese || 0
-    sum.math += score.math || 0
-    sum.english += score.english || 0
-    sum.physics += score.physics || 0
-    sum.chemistry += score.chemistry || 0
-    sum.biology += score.biology || 0
-  })
-
-  const len = scoreList.value.length
-  return [
-    Number((sum.chinese / len).toFixed(1)),
-    Number((sum.math / len).toFixed(1)),
-    Number((sum.english / len).toFixed(1)),
-    Number((sum.physics / len).toFixed(1)),
-    Number((sum.chemistry / len).toFixed(1)),
-    Number((sum.biology / len).toFixed(1))
-  ]
-}
-
-// 获取成绩列表
-const fetchScores = async () => {
+// 获取班级列表
+const fetchClasses = async () => {
   try {
-    loading.value = true
-    const res = await teacherApi.getScores()
+    const res = await teacherApi.getClasses()
     console.log(res)
     if (res.success) {
+      classList.value = res.data
+      // 默认选中第一个班级
+      if (res.data.length > 0 && !activeClassId.value) {
+        activeClassId.value = res.data[0].id
+        console.log("activeClassId",activeClassId.value)
+      }
+    }
+  } catch (error: any) {
+    message.error(error.message || '获取班级列表失败')
+  }
+}
+
+// 处理班级切换
+const handleClassChange = (classId: number) => {
+  activeClassId.value = classId
+  updateStatistics()
+}
+
+const fetchScores = async () => {
+  try {
+    if (!activeClassId.value) return
+    loading.value = true
+    const res = await teacherApi.getClassScores(activeClassId.value)
+    console.log("获取成绩列表",res)
+    if (res.success) {
+      allScores.value = res.data
       scoreList.value = res.data
-      initScoreDistributionChart()
-      initSubjectAverageChart()
+      updateStatistics()
     }
   } catch (error: any) {
     message.error(error.message || '获取成绩列表失败')
@@ -400,76 +344,45 @@ const handleRefresh = () => {
 
 // 编辑成绩
 const handleEdit = (record: Score) => {
-  // TODO: 实现编辑功能
-  console.log('编辑成绩', record)
+  editForm.value = { ...record } // 复制一份数据，避免直接修改原数据
+  editModalVisible.value = true
+}
+
+// 保存编辑
+const handleSaveEdit = async () => {
+  if (!editForm.value) return
+
+  try {
+    editLoading.value = true
+    const res = await teacherApi.updateScore(editForm.value)
+    if (res.success) {
+      message.success('更新成功')
+      editModalVisible.value = false
+      fetchScores() // 刷新列表
+    }
+  } catch (error: any) {
+    message.error(error.message || '更新失败')
+  } finally {
+    editLoading.value = false
+  }
 }
 
 // 删除成绩
 const handleDelete = async (record: Score) => {
-  // TODO: 实现删除功能
-  console.log('删除成绩', record)
-}
-
-// 显示成绩详情
-const showScoreDetails = (score: Score) => {
-  selectedScore.value = score
-  detailsModalVisible.value = true
-  nextTick(() => {
-    initRadarChart(score)
-  })
-}
-
-// 初始化个人成绩雷达图
-const initRadarChart = (score: Score) => {
-  const chartDom = document.querySelector('.radar-chart') as HTMLElement
-  if (!chartDom) return
-
-  radarChart = echarts.init(chartDom)
-  const option = {
-    title: {
-      text: '各科成绩分析'
-    },
-    radar: {
-      indicator: [
-        { name: '语文', max: 150 },
-        { name: '数学', max: 150 },
-        { name: '英语', max: 150 },
-        { name: '物理', max: 100 },
-        { name: '化学', max: 100 },
-        { name: '生物', max: 100 }
-      ]
-    },
-    series: [
-      {
-        type: 'radar',
-        data: [
-          {
-            value: [
-              score.chinese || 0,
-              score.math || 0,
-              score.english || 0,
-              score.physics || 0,
-              score.chemistry || 0,
-              score.biology || 0
-            ],
-            name: '个人成绩'
-          }
-        ]
-      }
-    ]
+  try {
+    const res = await teacherApi.deleteScore(record.id)
+    if (res.success) {
+      message.success('删除成功')
+      fetchScores() // 刷新列表
+    }
+  } catch (error: any) {
+    message.error(error.message || '删除失败')
   }
-  radarChart.setOption(option)
 }
 
-onMounted(() => {
-  fetchScores()
-})
-
-// 窗口大小变化时重绘图表
-window.addEventListener('resize', () => {
-  scoreDistributionChart?.resize()
-  subjectAverageChart?.resize()
-  radarChart?.resize()
+onMounted(async () => {
+  await fetchClasses()
+  await fetchScores()
 })
 </script>
 
@@ -487,20 +400,6 @@ window.addEventListener('resize', () => {
 
   .statistics-cards {
     margin-bottom: 24px;
-  }
-
-  .charts-container {
-    margin: 24px 0;
-
-    .chart {
-      height: 400px;
-      margin-bottom: 24px;
-    }
-  }
-
-  .radar-chart {
-    height: 400px;
-    margin-top: 24px;
   }
 }
 </style>

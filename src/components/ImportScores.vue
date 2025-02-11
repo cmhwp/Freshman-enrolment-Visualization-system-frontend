@@ -108,7 +108,8 @@ import { downloadFile } from '@/utils/file'
 import type { ImportResult } from '@/api/teacher'
 
 const props = defineProps<{
-  visible: boolean
+  visible: boolean,
+  classId: number
 }>()
 
 const emit = defineEmits(['update:visible', 'success'])
@@ -120,13 +121,13 @@ const importResult = ref<ImportResult>()
 // 下载模板
 const handleDownloadTemplate = async () => {
   try {
-    const res = await teacherApi.downloadScoreTemplate()
+    const res = await teacherApi.downloadScoreTemplate(props.classId)
     if (res instanceof Blob) {
       downloadFile(res, 'student_score_template.xlsx')
       message.success('模板下载成功')
     }
-  } catch (error) {
-    message.error('下载模板失败')
+  } catch (error: any) {
+    message.error('该班级所有学生都已有成绩记录')
   }
 }
 
@@ -134,7 +135,7 @@ const handleDownloadTemplate = async () => {
 const handleUpload = async ({ file }: { file: File }) => {
   try {
     loading.value = true
-    const res = await teacherApi.importScores(file)
+    const res = await teacherApi.importScores(props.classId, file)
 
     if (res.success && res.data) {
       importResult.value = res.data

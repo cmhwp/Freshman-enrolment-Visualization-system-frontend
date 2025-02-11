@@ -31,6 +31,12 @@
             </template>
             <span>排名分析</span>
           </a-menu-item>
+          <a-menu-item key="student/todo-list">
+            <template #icon>
+              <bell-outlined />
+            </template>
+            <span>待办事项</span>
+          </a-menu-item>
         </template>
 
         <!-- 教师菜单 -->
@@ -42,12 +48,19 @@
             <template #title>班级管理</template>
             <a-menu-item key="teacher/class-management">班级列表</a-menu-item>
             <a-menu-item key="teacher/score-management">成绩管理</a-menu-item>
+            <a-menu-item key="teacher/report-status">报到统计</a-menu-item>
           </a-sub-menu>
-          <a-menu-item key="teacher/statistics">
+          <a-menu-item key="teacher/score-analysis">
             <template #icon>
               <line-chart-outlined />
             </template>
             <span>统计分析</span>
+          </a-menu-item>
+          <a-menu-item key="teacher/todo-list">
+            <template #icon>
+              <bell-outlined />
+            </template>
+            <span>待办事项</span>
           </a-menu-item>
         </template>
 
@@ -113,6 +126,7 @@
                     <user-outlined />
                     个人信息
                   </a-menu-item>
+
                   <a-menu-item key="logout" @click="handleLogout">
                     <logout-outlined />
                     退出登录
@@ -144,7 +158,8 @@ import {
   LineChartOutlined,
   TrophyOutlined,
   SettingOutlined,
-  LogoutOutlined
+  LogoutOutlined,
+  BellOutlined
 } from '@ant-design/icons-vue'
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'

@@ -24,7 +24,13 @@ export const LOG_TYPES = {
   delete_room: '删除宿舍房间',
   checkout: '退宿',
   change_room: '调整宿舍',
-  assign_room: '分配宿舍'
+  assign_room: '分配宿舍',
+  analyze_class_scores: '分析班级成绩',
+  assign_students: '分配学生',
+  remove_students: '移除学生',
+  assign_dormitories: '分配宿舍',
+  delete_building:'删除宿舍楼',
+  update_building:'更新宿舍楼'
 }
 
 export type LogType = keyof typeof LOG_TYPES
