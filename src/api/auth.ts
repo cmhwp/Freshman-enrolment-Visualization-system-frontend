@@ -28,6 +28,13 @@ export const authApi = {
     return request.post<any, { access_token: string }>('/auth/refresh')
   },
 
+  //获取是否允许注册
+  getRegisterStatus: () => {
+    return request.get<any, { success: boolean; message: string; data: { allowRegister: boolean } }>(
+      '/auth/register-status'
+    )
+  },
+
   // 发送重置密码验证码
   sendResetCode: (email: string) => {
     return request.post<any, { success: boolean; message: string }>(

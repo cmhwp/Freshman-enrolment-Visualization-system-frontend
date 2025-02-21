@@ -121,12 +121,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, computed, onBeforeUnmount } from 'vue'
+import { ref, onMounted, computed, onBeforeUnmount } from 'vue'
 import { message } from 'ant-design-vue'
 import * as echarts from 'echarts'
 import { teacherApi } from '@/api'
 import type { ClassInfo, Score } from '@/types/api'
-import { SyncOutlined, BulbOutlined, CheckCircleOutlined, BarChartOutlined, BookOutlined, PieChartOutlined, WarningOutlined, SolutionOutlined } from '@ant-design/icons-vue'
+import { SyncOutlined, CheckCircleOutlined } from '@ant-design/icons-vue'
 import MarkdownIt from 'markdown-it'
 import 'highlight.js/styles/github.css'
 
@@ -461,6 +461,7 @@ const fetchAnalysis = async () => {
 
   try {
     const res = await teacherApi.getScoreAnalysis(selectedClassId.value)
+    console.log(res)
     if (res.success && res.data) {
       aiAnalysis.value = res.data
       reportUpdatedAt.value = res.updated_at || new Date().toISOString()
@@ -490,17 +491,6 @@ onBeforeUnmount(() => {
   }
 })
 
-// 添加获取章节图标的方法
-const getSectionIcon = (title: string) => {
-  const iconMap: Record<string, any> = {
-    '整体表现分析': BarChartOutlined,
-    '各科目表现分析': BookOutlined,
-    '成绩分布特点': PieChartOutlined,
-    '存在的问题和短板': WarningOutlined,
-    '针对性的改进建议': SolutionOutlined
-  }
-  return iconMap[title]
-}
 </script>
 
 <style scoped lang="less">

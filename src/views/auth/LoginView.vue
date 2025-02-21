@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import type { FormInstance } from 'ant-design-vue'
@@ -17,7 +17,7 @@ import {
 const router = useRouter()
 const userStore = useUserStore()
 const resetFormRef = ref<FormInstance>()
-
+const allowRegister = ref(false)
 // 登录表单状态
 const formState = reactive<LoginRequest>({
   username: '',
@@ -145,6 +145,16 @@ const handleResetPassword = async () => {
     resetLoading.value = false
   }
 }
+
+// 获取是否允许注册
+const getRegisterStatus = async () => {
+  const response = await authApi.getRegisterStatus()
+  allowRegister.value = response.data.allowRegister
+}
+
+onMounted(() => {
+  getRegisterStatus()
+})
 </script>
 
 <template>
@@ -193,7 +203,7 @@ const handleResetPassword = async () => {
           </a-button>
         </a-form-item>
 
-        <div class="register-link">
+        <div class="register-link" v-if="allowRegister">
           还没有账号？
           <router-link to="/register">立即注册</router-link>
         </div>

@@ -17,7 +17,10 @@ export default defineConfigWithVueTs(
     name: 'app/files-to-ignore',
     ignores: ['**/dist/**', '**/dist-ssr/**', '**/coverage/**'],
   },
-
+  {
+    name:'@typescript-eslint/no-explicit-any',
+    ignores: ['**/*.{ts,mts,tsx,vue}'],
+  },
   pluginVue.configs['flat/essential'],
   vueTsConfigs.recommended,
   skipFormatting,

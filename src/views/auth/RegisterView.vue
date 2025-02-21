@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { authApi } from '@/api'
@@ -12,7 +12,7 @@ const router = useRouter()
 const loading = ref(false)
 const sendingCode = ref(false)
 const countdown = ref(0)
-
+const allowRegister = ref(false)
 const formState = reactive<RegisterRequest & { confirmPassword: string }>({
   username: '',
   email: '',
@@ -103,10 +103,20 @@ const handleSubmit = async () => {
     loading.value = false
   }
 }
+
+// 获取是否允许注册
+const getRegisterStatus = async () => {
+  const response = await authApi.getRegisterStatus()
+  allowRegister.value = response.data.allowRegister
+}
+
+onMounted(() => {
+  getRegisterStatus()
+})
 </script>
 
 <template>
-  <div class="register-container">
+  <div class="register-container" v-if="allowRegister">
     <div class="register-content">
       <div class="register-header">
         <VueLogo class="logo" />
@@ -200,6 +210,11 @@ const handleSubmit = async () => {
           <router-link to="/login">立即登录</router-link>
         </div>
       </a-form>
+    </div>
+    </div>
+  <div class="register-container" v-else>
+    <div class="register-content">
+      <h1>当前不允许注册</h1>
     </div>
   </div>
 </template>

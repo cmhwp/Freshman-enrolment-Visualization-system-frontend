@@ -171,7 +171,7 @@ export const teacherApi = {
 
   // 获取成绩分析报告
   getScoreAnalysis: (classId: number) => {
-    return request.get<any, { success: boolean; data: string | null; updated_at?: string }>(
+    return request.get<any, { success: boolean; data: string | null; create_at?:string, updated_at?: string }>(
       `/teacher/classes/${classId}/analysis`
     )
   },

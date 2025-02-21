@@ -30,7 +30,13 @@ export const LOG_TYPES = {
   remove_students: '移除学生',
   assign_dormitories: '分配宿舍',
   delete_building:'删除宿舍楼',
-  update_building:'更新宿舍楼'
+  update_building:'更新宿舍楼',
+  create_todo:'创建待办事项',
+  update_todo:'更新待办事项',
+  delete_todo:'删除待办事项',
+  update_student_report_status:'更新学生报到状态',
+  generate_analysis_report:'生成分析报告',
+
 }
 
 export type LogType = keyof typeof LOG_TYPES
